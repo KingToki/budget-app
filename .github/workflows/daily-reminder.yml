@@ -2,10 +2,8 @@ name: Daily Budget Reminder
 
 on:
   schedule:
-    # 19:00 Kyiv = 16:00 UTC (UTC+3 влітку)
-    # Взимку Київ UTC+2, тоді змінити на 17:00
-    - cron: '0 16 * * *'
-  workflow_dispatch: # можна запустити вручну для тесту
+    - cron: '0 16 * * *'   # 19:00 Kyiv (UTC+3 summer)
+  workflow_dispatch:
 
 jobs:
   send-reminder:
@@ -16,7 +14,6 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          # Масив фраз
           MESSAGES=(
             "💰 Що в нас сьогодні по витратам? Відкрий бюджет і перевір! 🦆"
             "📊 Як справи з грошима? Час підбити підсумки дня! 💸"
@@ -31,23 +28,8 @@ jobs:
             "📅 Нагадування від качки: бюджет сам себе не заповнить! 🦆✏️"
             "🔥 Фінансова дисципліна — це суперсила! Перевір витрати за сьогодні 💪"
           )
-
-          # Вибираємо випадкову фразу
           RANDOM_INDEX=$((RANDOM % ${#MESSAGES[@]}))
           MESSAGE="${MESSAGES[$RANDOM_INDEX]}"
-
-          # Відправляємо в Telegram
           curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"chat_id\": \"${CHAT_ID}\",
-              \"text\": \"${MESSAGE}\",
-              \"reply_markup\": {
-                \"inline_keyboard\": [[
-                  {
-                    \"text\": \"💰 Відкрити бюджет\",
-                    \"web_app\": {\"url\": \"https://kingtoki.github.io/budget-app/\"}
-                  }
-                ]]
-              }
-            }"
+            -d "{\"chat_id\": \"${CHAT_ID}\", \"text\": \"${MESSAGE}\", \"reply_markup\": {\"inline_keyboard\": [[{\"text\": \"💰 Відкрити бюджет\", \"web_app\": {\"url\": \"https://kingtoki.github.io/budget-app/\"}}]]}}"
