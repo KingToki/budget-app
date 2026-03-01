@@ -1565,7 +1565,7 @@ function renderHistory(){
   if(!root) return;
   root.innerHTML = '';
   if(!history.length){
-    root.innerHTML = '<div class="no-hist">📅 Історія порожня — закрий перший місяць щоб вона з'явилась</div>';
+    root.innerHTML = '<div class="no-hist">📅 Історія порожня — закрий перший місяць щоб вона появилась</div>';
     return;
   }
   renderAnalytics();
@@ -1689,7 +1689,11 @@ try {
 // Main startup — async because CloudStorage is async
 (async function(){
   // Show loading indicator
-  document.body.innerHTML += '<div id="loading" style="position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style=\"font-size:36px;animation:duckFloat 1s ease-in-out infinite\">🦆</div><div style=\"font-size:11px;color:var(--muted2);letter-spacing:2px\">ЗАВАНТАЖЕННЯ...</div></div>';
+    const loadDiv = document.createElement('div');
+  loadDiv.id = 'loading';
+  loadDiv.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px';
+  loadDiv.innerHTML = '<div style="font-size:36px;animation:duckFloat 1s ease-in-out infinite">🦆</div><div style="font-size:11px;color:var(--muted2);letter-spacing:2px">ЗАВАНТАЖЕННЯ...</div>';
+  document.body.appendChild(loadDiv);
 
   const done = await loadAll();
 
