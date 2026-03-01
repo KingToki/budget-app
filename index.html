@@ -357,6 +357,27 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
 
 /* Prevent iOS zoom on input focus */
 input, select, textarea { font-size: 16px !important; }
+
+/* PLAN/FACT SUMMARY GRID */
+.pf-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:20px;overflow:hidden;}
+.pf-corner,.pf-hdr,.pf-lbl,.pf-val{padding:10px 12px;background:var(--card);}
+.pf-corner{background:var(--card2);}
+.pf-hdr{font-size:9px;letter-spacing:2px;text-transform:uppercase;text-align:center;background:var(--card2);}
+.pf-hdr.plan-hdr{color:var(--muted2);}
+.pf-hdr.fact-hdr{color:var(--accent);}
+.pf-lbl{font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:4px;white-space:nowrap;background:var(--card2);}
+.pf-val{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;text-align:right;}
+.pf-val.plan{color:var(--muted2);}
+.pf-val.fact{color:var(--text);}
+.pf-val.bal.plan{color:var(--muted2);}
+.pf-val.bal.fact{color:var(--green);}
+.pf-val.bal.fact.neg{color:var(--red);}
+.pf-val.bal.fact.warn{color:var(--orange);}
+/* Highlight last row (balance) */
+.pf-grid > div:nth-child(7),
+.pf-grid > div:nth-child(8),
+.pf-grid > div:nth-child(9){border-top:1px solid var(--border2);}
+
 </style>
 </head>
 <body>
@@ -457,10 +478,19 @@ input, select, textarea { font-size: 16px !important; }
 
   <!-- BUDGET TAB -->
   <div class="tab-panel on" id="tab-budget">
-    <div class="sum-grid">
-      <div class="sc inc"><div class="sc-lbl">Дохід</div><div class="sc-val" id="s-inc">—</div></div>
-      <div class="sc exp"><div class="sc-lbl">Витрачено</div><div class="sc-val" id="s-exp">—</div></div>
-      <div class="sc bal"><div class="sc-lbl">Залишок</div><div class="sc-val" id="s-bal">—<span id="bal-duck" style="font-size:16px;margin-left:6px;">🦆</span></div></div>
+    <div class="pf-grid">
+      <div class="pf-corner"></div>
+      <div class="pf-hdr plan-hdr">📋 ПЛАН</div>
+      <div class="pf-hdr fact-hdr">✅ ФАКТ</div>
+      <div class="pf-lbl">💰 Дохід</div>
+      <div class="pf-val plan" id="s-inc-plan">—</div>
+      <div class="pf-val fact" id="s-inc-fact">—</div>
+      <div class="pf-lbl">💸 Витрати</div>
+      <div class="pf-val plan" id="s-exp-plan">—</div>
+      <div class="pf-val fact" id="s-exp-fact">—</div>
+      <div class="pf-lbl">🦆 Залишок <span id="bal-duck" style="font-size:13px">😊</span></div>
+      <div class="pf-val plan bal" id="s-bal-plan">—</div>
+      <div class="pf-val fact bal" id="s-bal-fact">—</div>
     </div>
     <div class="act-bar">
       <button class="abtn ai" onclick="openModal('income')">＋ Дохід</button>
@@ -598,13 +628,14 @@ let dmType = 'debt';
 let _lastBal = undefined;
 
 const BASE_CATS = [
-  { key:'housing',   lbl:'Житло',       icon:'🏠' },
+  { key:'monthly',   lbl:'Щомісячне',   icon:'🔄' },
   { key:'food',      lbl:'Їжа',         icon:'🍽️' },
   { key:'transport', lbl:'Транспорт',   icon:'🚗' },
   { key:'health',    lbl:"Здоров'я",    icon:'💪' },
   { key:'education', lbl:'Навчання',    icon:'🎓' },
   { key:'fun',       lbl:'Розваги',     icon:'🎉' },
   { key:'savings',   lbl:'Заощадження', icon:'💰' },
+  { key:'misc',      lbl:'Різне',       icon:'📦' },
 ];
 
 // ═══════════════════════════════════════
@@ -674,12 +705,12 @@ function totalPlan(key){ return (bdata[key]||[]).reduce((s,i)=>s+i.plan,0); }
 function totalFact(key){ return (bdata[key]||[]).reduce((s,i)=>s+sumFacts(i),0); }
 
 const ICON_MAP = [
-  [['оренд','квартир'],'🏠'],[['комунал','електр'],'💡'],[['інтернет'],'📶'],
+  [['оренд','квартир','щомісяч','абонплат','підписк'],'🔄'],[['комунал','електр'],'💡'],[['інтернет'],'📶'],
   [['продукт','супермаркет','сільпо','metro','атб'],'🛒'],[['кафе','ресторан','їжа','доставк'],'🍕'],
   [['кава','кофе'],'☕'],[['алко','пиво','вино'],'🍺'],[['бензин','заправ','паливо'],'⛽'],
   [['авто','машин','ремонт авт'],'🚗'],[['таксі','убер','bolt'],'🚕'],[['метро','транспорт'],'🚇'],
   [['одяг','взуття','шопінг'],'👕'],[['аптека','ліки','лікар'],'💊'],[['спорт','фітнес','зал'],'🏋️'],
-  [['кіно','кино','розваг'],'🎬'],[['підписк','netflix','spotify'],'📱'],[['курс','навчан','книг'],'📚'],
+  [['кіно','кино','розваг'],'🎬'],[['різне','інше'],'📦'],[['netflix','spotify'],'📱'],[['курс','навчан','книг'],'📚'],
   [['зарплат','оклад'],'💰'],[['фріланс','проект'],'💻'],[['бонус','премія'],'🎁'],
   [['борг','кредит'],'💸'],[['розстроч'],'📅'],
 ];
@@ -1074,16 +1105,42 @@ function recalc(){
   SECTIONS.filter(s=>!s.isInc).forEach(s=>{ tExp+=totalFact_(s.key); });
   const bal=totalInc-tExp;
 
-  document.getElementById('s-inc').textContent=fmt(totalInc);
-  document.getElementById('s-exp').textContent=fmt(tExp);
-  const bEl=document.getElementById('s-bal');
-  const duck=document.getElementById('bal-duck');
-  bEl.textContent=fmt(bal);
-  if(duck) bEl.appendChild(duck);
-  bEl.style.color=bal>=0?'var(--green)':'var(--red)';
-  if(duck) duck.textContent=bal>5000?'🦆😄':bal>0?'🦆😊':bal===0?'🦆😐':bal>-5000?'🦆😰':'🦆😱';
-  if(_lastBal!==undefined&&_lastBal<=0&&bal>0) confetti();
-  _lastBal=bal;
+  // Plan totals
+  const planInc = (bdata['extraIncome']||[]).reduce((s,i)=>s+i.plan,0);
+  let planExp = 0;
+  SECTIONS.filter(s=>!s.isInc).forEach(s=>{ planExp += totalPlan(s.key); });
+  const planBal = planInc - planExp;
+
+  // Fact totals
+  const factInc = (bdata['extraIncome']||[]).reduce((s,i)=>s+sumFacts(i),0);
+  const factBal = factInc - tExp;
+
+  // Update plan column
+  const setEl = (id, val, cls) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = fmt(val);
+    if(cls) { el.classList.remove('neg','warn'); if(cls!=='pos') el.classList.add(cls); }
+  };
+  setEl('s-inc-plan', planInc);
+  setEl('s-exp-plan', planExp);
+  setEl('s-bal-plan', planBal, planBal<0?'neg':planBal<planInc*0.1?'warn':'pos');
+
+  // Update fact column
+  setEl('s-inc-fact', factInc);
+  setEl('s-exp-fact', tExp);
+  setEl('s-bal-fact', factBal, factBal<0?'neg':factBal<planInc*0.1?'warn':'pos');
+
+  // Duck emoji based on fact balance
+  const duck = document.getElementById('bal-duck');
+  if(duck) duck.textContent = factBal>planBal*0.5?'😄':factBal>0?'😊':factBal===0?'😐':factBal>-5000?'😰':'😱';
+
+  // Confetti when fact balance goes positive
+  if(_lastBal!==undefined&&_lastBal<=0&&factBal>0) confetti();
+  _lastBal=factBal;
+
+  // Legacy IDs fallback (remove old elements if still exist)
+  ['s-inc','s-exp','s-bal'].forEach(id=>{ const e=document.getElementById(id); if(e&&e.id) e.textContent=''; });
 
   // Category limits shown via badges in buildTot
 
