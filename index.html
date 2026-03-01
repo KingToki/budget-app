@@ -309,6 +309,41 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
 /* RECURRING badge */
 .rec-badge{font-size:8px;background:rgba(200,240,96,.15);color:var(--accent);border:1px solid rgba(200,240,96,.3);padding:1px 5px;margin-left:6px;vertical-align:middle;}
 
+
+/* LIMITS */
+.limit-warn { border-left: 3px solid var(--orange) !important; }
+.limit-over { border-left: 3px solid var(--red) !important; }
+.limit-badge { font-size: 9px; padding: 1px 6px; margin-left: 6px; border-radius: 2px; vertical-align: middle; font-weight: 600; }
+.limit-badge.warn { background: rgba(240,160,96,.2); color: var(--orange); border: 1px solid rgba(240,160,96,.4); }
+.limit-badge.over { background: rgba(240,96,96,.2); color: var(--red); border: 1px solid rgba(240,96,96,.4); animation: pulse-red 1.2s ease infinite; }
+.limit-inp-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.limit-inp-row label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted2); white-space: nowrap; }
+.limit-inp { width: 100px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 8px; outline: none; }
+.limit-inp:focus { border-color: var(--orange); }
+.sp-cat-item { display: flex; flex-direction: column; }
+
+/* ANALYTICS */
+.analytics-block { margin-top: 28px; }
+.ana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.ana-card { background: var(--card); border: 1px solid var(--border); padding: 14px 16px; }
+.ana-card-lbl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted2); margin-bottom: 6px; }
+.ana-card-val { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--accent); }
+.ana-card-sub { font-size: 9px; color: var(--muted2); margin-top: 3px; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; }
+.compare-table th { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted2); text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.compare-table th:first-child { text-align: left; }
+.compare-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); text-align: right; }
+.compare-table td:first-child { text-align: left; color: var(--muted2); }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .highlight { color: var(--accent); font-weight: 600; }
+.trend-up { color: var(--red); }
+.trend-dn { color: var(--green); }
+.trend-eq { color: var(--muted2); }
+
+/* INLINE HINT */
+.inline-hint { background: var(--card2); border: 1px solid var(--border); padding: 10px 14px; margin-bottom: 16px; font-size: 10px; color: var(--muted2); line-height: 1.7; }
+.inline-hint strong { color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -418,6 +453,10 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
       <button class="abtn ai" onclick="openModal('income')">＋ Дохід</button>
       <button class="abtn ae" onclick="openModal('expense')">＋ Витрата</button>
     </div>
+    <div class="inline-hint" id="inline-hint" style="display:none">
+      🤖 <strong>Швидкий запис:</strong> напиши боту прямо в Telegram:<br>
+      <strong>кафе 80</strong> · <strong>таксі 150</strong> · <strong>продукти 350</strong>
+    </div>
     <div id="sections-root"></div>
     <div class="bars" id="bars-wrap" style="display:none">
       <div class="sec-hdr"><span class="sec-ttl">Розподіл</span><div class="sec-line"></div></div>
@@ -476,6 +515,10 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
     <div class="field" id="bm-cat-wrap" style="display:none">
       <label>Категорія</label>
       <select id="bm-cat"></select>
+    </div>
+    <div class="field" id="bm-lim-wrap" style="display:none">
+      <label>Ліміт на цю статтю (необов'язково)</label>
+      <input type="number" id="bm-limit" placeholder="напр. 500" min="0" inputmode="decimal">
     </div>
     <div class="m-acts">
       <button class="mbtn cancel" onclick="closeBM()">Скасувати</button>
@@ -784,6 +827,15 @@ function renderSpCats(){
   CUR_SEL=CUR.sym;
 }
 
+
+function setLimit(key, val){
+  const n = parseFloat(val);
+  if(n > 0) CAT_LIMITS[key] = n;
+  else delete CAT_LIMITS[key];
+  saveAll();
+  renderBudget();
+}
+
 function addCat(inputId){
   const inp=document.getElementById(inputId);
   const name=(inp?.value||'').trim();
@@ -913,7 +965,7 @@ function buildItem(item,sec){
   wrap.innerHTML=`
     <div class="item-main" onclick="togglePanel(${item.id})">
       <span class="chev${isOpen?' open':''}">▶</span>
-      <div><div class="i-name">${autoIcon(item.name)}${item.name}${item.recurring?'<span class="rec-badge">🔄</span>':''}</div>${item.note?`<div class="i-sub">${item.note}</div>`:''}</div>
+      <div><div class="i-name">${autoIcon(item.name)}${item.name}${item.recurring?'<span class="rec-badge">🔄</span>':''}${(()=>{if(!item.limit)return '';const f=sumFacts(item),pct=f/item.limit*100;if(pct>=100)return '<span class="limit-badge over">🔴 '+Math.round(pct)+'%</span>';if(pct>=75)return '<span class="limit-badge warn">🟡 '+Math.round(pct)+'%</span>';return '<span class="limit-badge" style="color:var(--muted2);font-size:8px">ліміт '+fmt(item.limit)+'</span>';})()}</div>${item.note?`<div class="i-sub">${item.note}</div>`:''}</div>
       <div class="i-plan"><div class="blbl">план</div><div class="bval">${fmt(item.plan)}</div></div>
       <div class="i-fact"><div class="blbl">факт</div><div class="bval">${fmt(fact)}</div></div>
       <div class="i-rem"><div class="blbl">залишок</div><div class="bval ${rc}">${fmt(rem)}</div></div>
@@ -939,9 +991,17 @@ function buildItem(item,sec){
 function buildTot(key){
   const plan=totalPlan(key),fact=totalFact(key),rem=plan-fact;
   const rc=rem>0?'pos':rem<0?'neg':'zero';
+  const lim=CAT_LIMITS[key];
+  const limPct=lim?fact/lim*100:0;
+  let limBadge='';
+  if(lim){
+    if(limPct>=100) limBadge=`<span class="limit-badge over">🔴 ліміт ${Math.round(limPct)}%</span>`;
+    else if(limPct>=75) limBadge=`<span class="limit-badge warn">🟡 ліміт ${Math.round(limPct)}%</span>`;
+    else limBadge=`<span class="limit-badge" style="color:var(--muted2);background:none;border:none">ліміт ${fmt(lim)}</span>`;
+  }
   const d=document.createElement('div');
   d.className='tot-row';
-  d.innerHTML=`<span class="tot-lbl">Разом</span><div class="tot-vals"><div class="tv plan"><div class="tl">план</div><div class="tv-val">${fmt(plan)}</div></div><div class="tv fact"><div class="tl">факт</div><div class="tv-val">${fmt(fact)}</div></div><div class="tv rem"><div class="tl">залишок</div><div class="tv-val ${rc}">${fmt(rem)}</div></div></div>`;
+  d.innerHTML=`<span class="tot-lbl">Разом${limBadge}</span><div class="tot-vals"><div class="tv plan"><div class="tl">план</div><div class="tv-val">${fmt(plan)}</div></div><div class="tv fact"><div class="tl">факт</div><div class="tv-val">${fmt(fact)}</div></div><div class="tv rem"><div class="tl">залишок</div><div class="tv-val ${rc}">${fmt(rem)}</div></div></div>`;
   return d;
 }
 
@@ -959,6 +1019,21 @@ function addFact(itemId){
     if(item){ item.facts.push({id:uid(),label:lEl.value.trim()||'запис',amount}); break; }
   }
   openPanels.add(itemId);
+  // Check item limit on fact add
+  outer: for(const k of Object.keys(bdata)){
+    const item=bdata[k].find(i=>i.id===itemId);
+    if(item && item.limit){
+      const pct=sumFacts(item)/item.limit*100;
+      if(pct>=100){
+        const m=['🦆 '+item.name+': ліміт перевищено ('+Math.round(pct)+'%)! Качка в шоці 😱','🔴 '+item.name+' вийшов за ліміт! Бухгалтер-качка не схвалює 🦆'];
+        setTimeout(()=>showToast(m[Math.floor(Math.random()*m.length)]),400);
+      } else if(pct>=75){
+        const m=['⚠️ '+item.name+': вже '+Math.round(pct)+'% ліміту! Качка нервує 🦆','🟡 '+item.name+' — '+Math.round(pct)+'% від ліміту. Обережно!'];
+        setTimeout(()=>showToast(m[Math.floor(Math.random()*m.length)]),400);
+      }
+      break outer;
+    }
+  }
   saveAll(); renderBudget();
 }
 
@@ -996,6 +1071,8 @@ function recalc(){
   if(duck) duck.textContent=bal>5000?'🦆😄':bal>0?'🦆😊':bal===0?'🦆😐':bal>-5000?'🦆😰':'🦆😱';
   if(_lastBal!==undefined&&_lastBal<=0&&bal>0) confetti();
   _lastBal=bal;
+
+  // Category limits shown via badges in buildTot
 
   // bars
   const barsWrap=document.getElementById('bars-wrap');
@@ -1160,12 +1237,15 @@ function openModal(type){
     okBtn.className='mbtn ci'; okBtn.textContent='Додати дохід';
     catW.style.display='none'; factW.style.display='none';
     if(recW) recW.style.display='none';
+    document.getElementById('bm-lim-wrap').style.display='none';
     document.getElementById('bm-plbl').textContent='Сума';
   } else {
     title.textContent='+ Витрата'; title.className='m-title exp';
     okBtn.className='mbtn ce'; okBtn.textContent='Додати витрату';
     catW.style.display=''; factW.style.display='';
     if(recW) recW.style.display='';
+    document.getElementById('bm-lim-wrap').style.display='';
+    document.getElementById('bm-limit').value='';
     document.getElementById('bm-plbl').textContent='Планова сума';
     // rebuild dropdown
     const sel=document.getElementById('bm-cat');
@@ -1195,7 +1275,16 @@ function confirmBM(){
   } else {
     const cat=document.getElementById('bm-cat').value;
     if(!bdata[cat]) bdata[cat]=[];
-    bdata[cat].push({id,name,plan,facts,recurring:isRec});
+    const itemLimVal = parseFloat(document.getElementById('bm-limit').value);
+    const itemLimit = (!isNaN(itemLimVal) && itemLimVal > 0) ? itemLimVal : undefined;
+    bdata[cat].push({id,name,plan,facts,recurring:isRec,limit:itemLimit});
+    if(itemLimit && plan > itemLimit*0.75){
+      const pct = Math.round(plan/itemLimit*100);
+      const msgs = pct>=100
+        ? ['🦆 Ого! '+name+' вже '+pct+'% від свого ліміту!','🔴 '+name+': план перевищує ліміт! Качка плаче 😭']
+        : ['⚠️ '+name+': план '+pct+'% від ліміту! Качка нервує 🦆','🟡 '+name+' — вже '+pct+'% ліміту. Обережно!'];
+      setTimeout(()=>showToast(msgs[Math.floor(Math.random()*msgs.length)]),400);
+    }
   }
   closeBM(); saveAll(); renderBudget();
 }
@@ -1239,10 +1328,100 @@ function confirmDM(){
 }
 
 
+
+// ═══════════════════════════════════════
+//  ANALYTICS
+// ═══════════════════════════════════════
+function renderAnalytics(){
+  // Only show after at least 1 closed month
+  const root = document.getElementById('hist-root');
+  if(!root || !history.length) return;
+
+  // ── Summary cards ──────────────────────────────────────────
+  const avgInc  = history.reduce((s,h)=>s+h.totalInc,0)/history.length;
+  const avgExp  = history.reduce((s,h)=>s+h.totalExp,0)/history.length;
+  const avgBal  = history.reduce((s,h)=>s+h.balance,0)/history.length;
+  const bestMonth = history.reduce((best,h)=>h.balance>best.balance?h:best, history[0]);
+
+  const anaHtml = `
+  <div class="analytics-block">
+    <div class="sec-hdr"><span class="sec-ttl">📊 Аналітика</span><div class="sec-line"></div></div>
+    <div class="ana-grid">
+      <div class="ana-card">
+        <div class="ana-card-lbl">Середній дохід</div>
+        <div class="ana-card-val">${fmt(avgInc)}</div>
+        <div class="ana-card-sub">за ${history.length} міс.</div>
+      </div>
+      <div class="ana-card">
+        <div class="ana-card-lbl">Середні витрати</div>
+        <div class="ana-card-val" style="color:var(--red)">${fmt(avgExp)}</div>
+        <div class="ana-card-sub">за ${history.length} міс.</div>
+      </div>
+      <div class="ana-card">
+        <div class="ana-card-lbl">Середній залишок</div>
+        <div class="ana-card-val" style="color:${avgBal>=0?'var(--green)':'var(--red)'}">${fmt(avgBal)}</div>
+        <div class="ana-card-sub">за ${history.length} міс.</div>
+      </div>
+      <div class="ana-card">
+        <div class="ana-card-lbl">Найкращий місяць</div>
+        <div class="ana-card-val" style="color:var(--green)">${fmt(bestMonth.balance)}</div>
+        <div class="ana-card-sub">${bestMonth.label}</div>
+      </div>
+    </div>
+    ${history.length>=2 ? renderCompareTable() : ''}
+  </div>`;
+
+  // Insert analytics before history list
+  const existing = root.querySelector('.analytics-block');
+  if(existing) existing.remove();
+  root.insertAdjacentHTML('afterbegin', anaHtml);
+}
+
+function renderCompareTable(){
+  if(history.length < 2) return '';
+  // Get all unique category keys across history
+  const allKeys = [...new Set(history.flatMap(h=>h.sections.filter(s=>!s.isInc&&s.key!=='debtsExpense').map(s=>s.key)))];
+  // Show last 3 months
+  const months = history.slice(0,3);
+
+  const headers = months.map(h=>`<th>${h.label.split(' ')[0]}</th>`).join('');
+  const rows = allKeys.map(key=>{
+    const sec0 = months[0].sections.find(s=>s.key===key);
+    if(!sec0) return '';
+    const vals = months.map(h=>{
+      const sec = h.sections.find(s=>s.key===key);
+      return sec ? sec.items.reduce((s,i)=>s+i.fact,0) : 0;
+    });
+    // Trend: compare last 2
+    let trend='';
+    if(months.length>=2){
+      const diff=vals[0]-vals[1];
+      const pct=vals[1]>0?Math.round(Math.abs(diff)/vals[1]*100):0;
+      if(Math.abs(diff)>100) trend=diff>0?`<span class="trend-up">↑${pct}%</span>`:`<span class="trend-dn">↓${pct}%</span>`;
+    }
+    const cells=vals.map((v,i)=>`<td ${i===0?'class="highlight"':''}>${fmt(v)}</td>`).join('');
+    return `<tr><td>${sec0.icon} ${sec0.lbl} ${trend}</td>${cells}</tr>`;
+  }).filter(Boolean).join('');
+
+  return `
+  <div class="sec-hdr" style="margin-top:16px"><span class="sec-ttl">📈 Порівняння місяців</span><div class="sec-line"></div></div>
+  <table class="compare-table">
+    <thead><tr><th>Категорія</th>${headers}</tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot>
+      <tr style="border-top:1px solid var(--border2)">
+        <td style="color:var(--muted2);font-size:9px">Разом</td>
+        ${months.map((h,i)=>`<td ${i===0?'class="highlight"':''}>${fmt(h.totalExp)}</td>`).join('')}
+      </tr>
+    </tfoot>
+  </table>`;
+}
+
 // ═══════════════════════════════════════
 //  HISTORY & MONTH CLOSE
 // ═══════════════════════════════════════
-let history = [];   // [{month:'2026-03', label:'Березень 2026', bdata:{}, debts:[], balance, totalInc, totalExp}]
+let history = [];
+let CAT_LIMITS = {};  // key → number (optional spending limit per category)   // [{month:'2026-03', label:'Березень 2026', bdata:{}, debts:[], balance, totalInc, totalExp}]
 const MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 const openHistPanels = new Set();
 
@@ -1389,6 +1568,7 @@ function renderHistory(){
     root.innerHTML = '<div class="no-hist">📅 Історія порожня — закрий перший місяць щоб вона з'явилась</div>';
     return;
   }
+  renderAnalytics();
   history.forEach(h=>{
     const isOpen = openHistPanels.has(h.month);
     const balColor = h.balance>=0?'var(--green)':'var(--red)';
@@ -1441,7 +1621,7 @@ function toggleHist(key){
 async function saveAll(){
   try {
     // Pack all data into structured keys with version
-    const meta = { v: DATA_VERSION, cur: CUR, cats: CATS_ACTIVE, custom: CATS_CUSTOM, nextId, month: store._month };
+    const meta = { v: DATA_VERSION, cur: CUR, cats: CATS_ACTIVE, custom: CATS_CUSTOM, limits: CAT_LIMITS, nextId, month: store._month };
     await store.set('bv1_meta',   JSON.stringify(meta));
     await store.set('bv1_bdata',  JSON.stringify(bdata));
     await store.set('bv1_debts',  JSON.stringify(debts));
@@ -1466,6 +1646,7 @@ async function loadAll(){
       if(meta.custom) CATS_CUSTOM  = meta.custom;
       if(meta.nextId) nextId       = meta.nextId;
       if(meta.month)  store._month = meta.month;
+      if(meta.limits) CAT_LIMITS = meta.limits;
     }
     if(vals['bv1_bdata']) { try{ bdata   = JSON.parse(vals['bv1_bdata']); }catch(e){} }
     if(vals['bv1_debts']) { try{ debts   = JSON.parse(vals['bv1_debts']); }catch(e){} }
