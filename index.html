@@ -16,6 +16,45 @@
 }
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;padding-bottom:60px;}
 
+/* ONBOARDING */
+#ob{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
+#ob.hide{display:none!important;}
+.ob-box{background:var(--card);border:1px solid var(--border);max-width:460px;width:100%;padding:28px 24px;max-height:90vh;overflow-y:auto;}
+.ob-step{display:none;}.ob-step.on{display:block;animation:fadeUp .3s ease;}
+.ob-duck{font-size:44px;text-align:center;margin-bottom:10px;}
+.ob-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:6px;}
+.ob-sub{font-size:11px;color:var(--muted2);text-align:center;margin-bottom:20px;line-height:1.7;}
+.ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.ob-dot.on{background:var(--accent);}
+/* Currency */
+.cur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.cur-btn{padding:12px 6px;border:1px solid var(--border);background:none;color:var(--text);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;}
+.cur-btn .cs{font-size:20px;font-weight:700;}
+.cur-btn .cc{font-size:9px;color:var(--muted2);letter-spacing:1px;}
+.cur-btn.sel,.cur-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cur-btn.sel .cc{color:var(--accent);}
+.custom-cur{display:none;gap:8px;margin-bottom:14px;}
+.custom-cur.show{display:flex;}
+/* Categories */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.cat-btn{padding:11px 12px;border:1px solid var(--border);background:none;color:var(--muted2);cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+.cat-btn .ci{font-size:16px;flex-shrink:0;}
+.cat-btn .ck{margin-left:auto;color:var(--accent);opacity:0;}
+.cat-btn.on{border-color:var(--accent);color:var(--text);background:rgba(200,240,96,.05);}
+.cat-btn.on .ck{opacity:1;}
+.cat-btn:hover{border-color:var(--border2);color:var(--text);}
+/* Inputs */
+.ob-inp{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 10px;outline:none;}
+.ob-inp:focus{border-color:var(--accent);}
+.add-cat-row{display:flex;gap:8px;margin-bottom:14px;}
+.add-cat-btn{background:none;border:1px solid var(--accent);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:10px;padding:8px 12px;cursor:pointer;white-space:nowrap;}
+/* Buttons */
+.ob-btn{width:100%;padding:13px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1px solid var(--accent);background:none;color:var(--accent);transition:all .2s;margin-top:4px;}
+.ob-btn:hover{background:rgba(200,240,96,.1);}
+.ob-btn.back{border-color:var(--border);color:var(--muted2);margin-bottom:8px;}
+.ob-btn.back:hover{border-color:var(--muted2);}
+
 /* SETTINGS */
 .gear-btn{position:fixed;top:14px;right:14px;z-index:90;background:var(--card);border:1px solid var(--border);color:var(--muted2);font-size:16px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .gear-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -219,20 +258,130 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
   .i-rem{display:none}.tab{padding:10px 14px;font-size:10px;}
 }
 
-.cur-switcher{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;}
-.cs-btn{padding:5px 12px;border:1px solid var(--border);background:none;color:var(--muted2);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;transition:all .2s;border-radius:2px;}
-.cs-btn:hover{border-color:var(--border2);color:var(--text);}
-.cs-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(200,240,96,.08);}
+/* MONTH CLOSE DIALOG */
+#mcd{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+#mcd.open{display:flex;}
+.mcd-box{background:var(--card);border:1px solid var(--accent);max-width:420px;width:100%;padding:28px 24px;animation:fadeUp .3s ease;}
+.mcd-duck{font-size:40px;text-align:center;margin-bottom:10px;}
+.mcd-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:4px;}
+.mcd-sub{font-size:11px;color:var(--muted2);text-align:center;margin-bottom:20px;line-height:1.6;}
+.mcd-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card2);border:1px solid var(--border);margin-bottom:8px;}
+.mcd-row-lbl{font-size:11px;}
+.mcd-row-sub{font-size:9px;color:var(--muted2);margin-top:2px;}
+.mcd-row-val{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--accent);}
+.mcd-toggle{display:flex;gap:6px;}
+.mcd-opt{padding:5px 10px;border:1px solid var(--border);background:none;color:var(--muted2);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.mcd-opt.on{border-color:var(--accent);color:var(--accent);background:rgba(200,240,96,.08);}
+.mcd-acts{display:flex;gap:8px;margin-top:18px;}
+.mcd-btn{flex:1;padding:12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1px solid var(--accent);background:none;color:var(--accent);transition:all .2s;}
+.mcd-btn:hover{background:rgba(200,240,96,.1);}
+.mcd-btn.cancel{border-color:var(--border);color:var(--muted2);}
+.mcd-btn.cancel:hover{border-color:var(--muted2);}
+
+/* HISTORY TAB */
+.hist-month{background:var(--card);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.hm-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;transition:background .2s;}
+.hm-hdr:hover{background:var(--card2);}
+.hm-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+.hm-badge{display:flex;gap:10px;align-items:center;}
+.hm-bal{font-size:12px;font-weight:600;}
+.hm-bal.pos{color:var(--green)}.hm-bal.neg{color:var(--red)}
+.hm-chev{font-size:10px;color:var(--muted);transition:transform .2s;}
+.hm-chev.open{transform:rotate(90deg);}
+.hm-body{display:none;border-top:1px solid var(--border);}
+.hm-body.open{display:block;}
+.hm-sec{padding:10px 16px;}
+.hm-sec-ttl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
+.hm-item{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);}
+.hm-item:last-child{border-bottom:none;}
+.hm-item-name{color:var(--muted2);}
+.hm-item-vals{display:flex;gap:14px;}
+.hm-item-vals span{text-align:right;min-width:60px;}
+.hm-item-vals .fact{color:var(--text);font-weight:600;}
+.hm-sumrow{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--card2);border-top:1px solid var(--border);}
+.hm-sum-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);}
+.hm-sum-vals{display:flex;gap:16px;}
+.hm-sv{text-align:right;}
+.hm-sv-l{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.hm-sv-v{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.no-hist{text-align:center;padding:40px 20px;color:var(--muted);font-size:11px;border:1px dashed var(--border);}
+
+/* RECURRING badge */
+.rec-badge{font-size:8px;background:rgba(200,240,96,.15);color:var(--accent);border:1px solid rgba(200,240,96,.3);padding:1px 5px;margin-left:6px;vertical-align:middle;}
+
 </style>
 </head>
 <body>
+
+<!-- ONBOARDING -->
+<div id="ob" class="hide">
+  <div class="ob-box">
+    <!-- Step 1: Currency -->
+    <div class="ob-step on" id="ob1">
+      <div class="ob-duck">🦆</div>
+      <div class="ob-title">Вітаємо!</div>
+      <div class="ob-sub">Качка-бухгалтер готова помогти.<br>Обери валюту бюджету:</div>
+      <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+      <div class="cur-grid">
+        <button class="cur-btn" onclick="pickCur('₴','UAH',this)"><span class="cs">₴</span><span class="cc">UAH</span></button>
+        <button class="cur-btn" onclick="pickCur('$','USD',this)"><span class="cs">$</span><span class="cc">USD</span></button>
+        <button class="cur-btn" onclick="pickCur('€','EUR',this)"><span class="cs">€</span><span class="cc">EUR</span></button>
+        <button class="cur-btn" onclick="pickCur('₮','USDT',this)"><span class="cs">₮</span><span class="cc">USDT</span></button>
+        <button class="cur-btn" onclick="pickCur('£','GBP',this)"><span class="cs">£</span><span class="cc">GBP</span></button>
+        <button class="cur-btn" onclick="pickCur('?','OTHER',this)" id="cur-other"><span class="cs">✏️</span><span class="cc">Інша</span></button>
+      </div>
+      <div class="custom-cur" id="cur-custom">
+        <input class="ob-inp" type="text" id="cur-sym-inp" placeholder="Символ (₺)" maxlength="4">
+        <input class="ob-inp" type="text" id="cur-code-inp" placeholder="Код (TRY)" maxlength="5">
+      </div>
+      <button class="ob-btn" onclick="obGo(2)">Далі →</button>
+    </div>
+    <!-- Step 2: Categories -->
+    <div class="ob-step" id="ob2">
+      <div class="ob-duck">📊</div>
+      <div class="ob-title">Категорії</div>
+      <div class="ob-sub">Вибери потрібні розділи бюджету.<br>Можна змінити в налаштуваннях.</div>
+      <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div></div>
+      <div class="cat-grid" id="ob-cats"></div>
+      <div class="add-cat-row">
+        <input class="ob-inp" type="text" id="ob-new-cat" placeholder="🏷️ Своя категорія...">
+        <button class="add-cat-btn" onclick="addCat('ob-new-cat')">+ Додати</button>
+      </div>
+      <button class="ob-btn back" onclick="obGo(1)">← Назад</button>
+      <button class="ob-btn" onclick="obGo(3)">Далі →</button>
+    </div>
+    <!-- Step 3: Done -->
+    <div class="ob-step" id="ob3">
+      <div class="ob-duck">🎉</div>
+      <div class="ob-title">Все готово!</div>
+      <div class="ob-sub">Качка-бухгалтер налаштована!<br>Починай планувати свій бюджет 💰</div>
+      <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div></div>
+      <button class="ob-btn" onclick="finishOb()">🦆 Почати!</button>
+    </div>
+  </div>
+</div>
 
 <!-- SETTINGS PANEL -->
 <div id="sp" onclick="if(event.target===this)closeSP()">
   <div class="sp-box">
     <div class="sp-title">⚙️ Налаштування</div>
     <div class="sp-sec">
-      <div class="sp-lbl">Категорії витрат</div>
+      <div class="sp-lbl">Валюта</div>
+      <div class="cur-grid" id="sp-cur-grid">
+        <button class="cur-btn" onclick="pickCur('₴','UAH',this)"><span class="cs">₴</span><span class="cc">UAH</span></button>
+        <button class="cur-btn" onclick="pickCur('$','USD',this)"><span class="cs">$</span><span class="cc">USD</span></button>
+        <button class="cur-btn" onclick="pickCur('€','EUR',this)"><span class="cs">€</span><span class="cc">EUR</span></button>
+        <button class="cur-btn" onclick="pickCur('₮','USDT',this)"><span class="cs">₮</span><span class="cc">USDT</span></button>
+        <button class="cur-btn" onclick="pickCur('£','GBP',this)"><span class="cs">£</span><span class="cc">GBP</span></button>
+        <button class="cur-btn" onclick="pickCur('?','OTHER',this)"><span class="cs">✏️</span><span class="cc">Інша</span></button>
+      </div>
+      <div class="custom-cur" id="sp-cur-custom">
+        <input class="ob-inp" type="text" id="sp-sym-inp" placeholder="Символ" maxlength="4">
+        <input class="ob-inp" type="text" id="sp-code-inp" placeholder="Код" maxlength="5">
+      </div>
+    </div>
+    <div class="sp-sec">
+      <div class="sp-lbl">Активні категорії</div>
       <div class="cat-grid" id="sp-cats"></div>
       <div class="add-cat-row">
         <input class="ob-inp" type="text" id="sp-new-cat" placeholder="🏷️ Своя категорія...">
@@ -250,18 +399,12 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
   <header>
     <div class="month-lbl">🦆 Фінансовий планувальник</div>
     <h1><span class="duck-h" onclick="duckTap(this)">🦆</span><span id="h-title">Мій <span>Бюджет</span></span></h1>
-    <div class="cur-switcher">
-      <button class="cs-btn sel" onclick="switchCur('₴',this)">₴ UAH</button>
-      <button class="cs-btn" onclick="switchCur('$',this)">$ USD</button>
-      <button class="cs-btn" onclick="switchCur('€',this)">€ EUR</button>
-      <button class="cs-btn" onclick="switchCur('₮',this)">₮ USDT</button>
-      <button class="cs-btn" onclick="switchCur('£',this)">£ GBP</button>
-    </div>
   </header>
 
   <div class="tabs">
     <button class="tab on" onclick="goTab('budget',this)">💰 Бюджет</button>
     <button class="tab" onclick="goTab('debts',this)" id="debts-tab">💳 Борги</button>
+    <button class="tab" onclick="goTab('history',this)" id="hist-tab">📅 Історія</button>
   </div>
 
   <!-- BUDGET TAB -->
@@ -297,6 +440,27 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
   </div>
 </div>
 
+  <!-- HISTORY TAB -->
+  <div class="tab-panel" id="tab-history">
+    <div id="hist-root"></div>
+  </div>
+
+</div>
+
+<!-- MONTH CLOSE DIALOG -->
+<div id="mcd">
+  <div class="mcd-box">
+    <div class="mcd-duck">🦆</div>
+    <div class="mcd-title" id="mcd-title">Місяць закінчився!</div>
+    <div class="mcd-sub" id="mcd-sub">Час закрити місяць і почати новий</div>
+    <div id="mcd-rows"></div>
+    <div class="mcd-acts">
+      <button class="mcd-btn cancel" onclick="closeMCD()">Пізніше</button>
+      <button class="mcd-btn" onclick="closeMonth()">Закрити місяць →</button>
+    </div>
+  </div>
+</div>
+
 <!-- BUDGET MODAL -->
 <div class="modal-ov" id="bm" onclick="if(event.target===this)closeBM()">
   <div class="modal">
@@ -305,6 +469,9 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-
     <div class="field"><label id="bm-plbl">Сума</label><input type="number" id="bm-plan" placeholder="0" min="0" inputmode="decimal"></div>
     <label class="fact-check" id="bm-fact-wrap" style="display:none">
       <input type="checkbox" id="bm-is-fact"> Вже витратив — записати як факт
+    </label>
+    <label class="fact-check" id="bm-rec-wrap" style="display:none">
+      <input type="checkbox" id="bm-is-rec"> 🔄 Щомісячна витрата (переноситься автоматично)
     </label>
     <div class="field" id="bm-cat-wrap" style="display:none">
       <label>Категорія</label>
@@ -387,10 +554,55 @@ const BASE_CATS = [
 // ═══════════════════════════════════════
 //  STORAGE — safe wrapper
 // ═══════════════════════════════════════
+// ── DATA VERSION (bump when structure changes) ──────────────
+const DATA_VERSION = 1;
+
+// ── CLOUD STORAGE WRAPPER ────────────────────────────────────
+// Uses Telegram CloudStorage (synced across devices).
+// Falls back to localStorage if outside Telegram.
+const tgCloud = window.Telegram?.WebApp?.CloudStorage;
+
 const store = {
-  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
-  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
-  clear(){ try{ localStorage.clear(); }catch(e){} }
+  // Async set — CloudStorage is callback-based, we wrap in Promise
+  set(k, v){
+    return new Promise(resolve => {
+      if(tgCloud){
+        tgCloud.setItem(k, v, (err, ok) => resolve(ok));
+      } else {
+        resolve(false); // no localStorage fallback
+      }
+    });
+  },
+  // Async get
+  get(k){
+    return new Promise(resolve => {
+      if(tgCloud){
+        tgCloud.getItem(k, (err, val) => resolve(err ? null : (val||null)));
+      } else {
+        resolve(null); // no localStorage fallback
+      }
+    });
+  },
+  // Get multiple keys at once
+  getAll(keys){
+    return new Promise(resolve => {
+      if(tgCloud){
+        tgCloud.getItems(keys, (err, vals) => resolve(err ? {} : vals));
+      } else {
+        resolve({}); // no localStorage fallback
+      }
+    });
+  },
+  // Remove key
+  remove(k){
+    return new Promise(resolve => {
+      if(tgCloud){
+        tgCloud.removeItem(k, () => resolve());
+      } else {
+        resolve();
+      }
+    });
+  }
 };
 
 // ═══════════════════════════════════════
@@ -481,22 +693,6 @@ function confetti(){
     else ctx.clearRect(0,0,cv.width,cv.height);
   }
   draw();
-}
-
-
-function switchCur(sym, btn){
-  document.querySelectorAll('.cs-btn').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  CUR.sym = sym;
-  CUR.code = sym==='₴'?'UAH':sym==='$'?'USD':sym==='€'?'EUR':sym==='₮'?'USDT':sym==='£'?'GBP':'';
-  saveAll(); renderBudget(); renderDebts();
-}
-
-function initCurSwitcher(){
-  document.querySelectorAll('.cs-btn').forEach(b=>{
-    const s = b.textContent.trim().split(' ')[0];
-    b.classList.toggle('sel', s === CUR.sym);
-  });
 }
 
 // ═══════════════════════════════════════
@@ -623,6 +819,10 @@ function openSP(){
   document.getElementById('sp').classList.add('open');
 }
 function closeSP(){
+  const s=getPickedSym();
+  if(s&&s!=='?') CUR.sym=s;
+  const c=getPickedCode();
+  if(c) CUR.code=c;
   saveAll();
   document.getElementById('sp').classList.remove('open');
   rebuildSections();
@@ -713,7 +913,7 @@ function buildItem(item,sec){
   wrap.innerHTML=`
     <div class="item-main" onclick="togglePanel(${item.id})">
       <span class="chev${isOpen?' open':''}">▶</span>
-      <div><div class="i-name">${autoIcon(item.name)}${item.name}</div>${item.note?`<div class="i-sub">${item.note}</div>`:''}</div>
+      <div><div class="i-name">${autoIcon(item.name)}${item.name}${item.recurring?'<span class="rec-badge">🔄</span>':''}</div>${item.note?`<div class="i-sub">${item.note}</div>`:''}</div>
       <div class="i-plan"><div class="blbl">план</div><div class="bval">${fmt(item.plan)}</div></div>
       <div class="i-fact"><div class="blbl">факт</div><div class="bval">${fmt(fact)}</div></div>
       <div class="i-rem"><div class="blbl">залишок</div><div class="bval ${rc}">${fmt(rem)}</div></div>
@@ -954,15 +1154,18 @@ function openModal(type){
   document.getElementById('bm-is-fact').checked=false;
   const title=document.getElementById('bm-title'), okBtn=document.getElementById('bm-ok');
   const catW=document.getElementById('bm-cat-wrap'), factW=document.getElementById('bm-fact-wrap');
+  const recW=document.getElementById('bm-rec-wrap');
   if(type==='income'){
     title.textContent='+ Дохід'; title.className='m-title inc';
     okBtn.className='mbtn ci'; okBtn.textContent='Додати дохід';
     catW.style.display='none'; factW.style.display='none';
+    if(recW) recW.style.display='none';
     document.getElementById('bm-plbl').textContent='Сума';
   } else {
     title.textContent='+ Витрата'; title.className='m-title exp';
     okBtn.className='mbtn ce'; okBtn.textContent='Додати витрату';
     catW.style.display=''; factW.style.display='';
+    if(recW) recW.style.display='';
     document.getElementById('bm-plbl').textContent='Планова сума';
     // rebuild dropdown
     const sel=document.getElementById('bm-cat');
@@ -983,6 +1186,7 @@ function confirmBM(){
     return;
   }
   const isFact=bmType!=='income'&&document.getElementById('bm-is-fact').checked;
+  const isRec=bmType!=='income'&&document.getElementById('bm-is-rec').checked;
   const facts=isFact?[{id:uid(),label:name,amount:plan}]:[];
   const id=uid();
   if(bmType==='income'){
@@ -991,7 +1195,7 @@ function confirmBM(){
   } else {
     const cat=document.getElementById('bm-cat').value;
     if(!bdata[cat]) bdata[cat]=[];
-    bdata[cat].push({id,name,plan,facts});
+    bdata[cat].push({id,name,plan,facts,recurring:isRec});
   }
   closeBM(); saveAll(); renderBudget();
 }
@@ -1034,31 +1238,240 @@ function confirmDM(){
   closeDM(); syncDebts(); saveAll(); renderDebts(); renderBudget();
 }
 
+
+// ═══════════════════════════════════════
+//  HISTORY & MONTH CLOSE
+// ═══════════════════════════════════════
+let history = [];   // [{month:'2026-03', label:'Березень 2026', bdata:{}, debts:[], balance, totalInc, totalExp}]
+const MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const openHistPanels = new Set();
+
+// Check if we need to prompt month close
+function checkMonthRollover(){
+  const now = new Date();
+  const curKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const saved = store._month || null;
+  if(saved && saved !== curKey){
+    // Month changed — show dialog
+    showMCD(saved, curKey);
+  } else if(!saved){
+    store._month = curKey; saveAll();
+  }
+}
+
+function showMCD(oldKey, newKey){
+  const [yr, mo] = oldKey.split('-');
+  const label = MONTHS_UK[parseInt(mo)-1] + ' ' + yr;
+  document.getElementById('mcd-title').textContent = label + ' — закриваємо? 🦆';
+
+  // Calculate balance
+  const totalInc = (bdata['extraIncome']||[]).reduce((s,i)=>s+i.plan,0);
+  let totalExp = 0;
+  SECTIONS.filter(s=>!s.isInc).forEach(s=>{ totalExp += (bdata[s.key]||[]).reduce((sum,i)=>sum+sumFacts(i),0); });
+  const bal = totalInc - totalExp;
+  const balFmt = fmt(bal);
+  const balColor = bal>=0?'var(--green)':'var(--red)';
+
+  // Build rows
+  const rowsEl = document.getElementById('mcd-rows');
+  rowsEl.innerHTML = `
+    <div class="mcd-row">
+      <div><div class="mcd-row-lbl">💰 Залишок місяця</div><div class="mcd-row-sub">Що зробити з <strong style="color:${balColor}">${balFmt}</strong>?</div></div>
+      <div class="mcd-toggle">
+        <button class="mcd-opt ${bal>0?'on':''}" id="mcd-bal-keep" onclick="mcdToggle('bal','keep')">Перенести</button>
+        <button class="mcd-opt ${bal<=0?'on':''}" id="mcd-bal-drop" onclick="mcdToggle('bal','drop')">Скинути</button>
+      </div>
+    </div>
+    <div class="mcd-row" style="opacity:.7">
+      <div><div class="mcd-row-lbl">🔄 Щомісячні витрати</div><div class="mcd-row-sub">Переносяться автоматично</div></div>
+      <div style="font-size:10px;color:var(--accent)">завжди ✓</div>
+    </div>
+    <div class="mcd-row" style="opacity:.7">
+      <div><div class="mcd-row-lbl">💳 Борги та розстрочки</div><div class="mcd-row-sub">Продовжуються автоматично</div></div>
+      <div style="font-size:10px;color:var(--accent)">завжди ✓</div>
+    </div>
+  `;
+  document.getElementById('mcd-sub').textContent = 'Місяць змінився — час підбити підсумки ' + label;
+  document.getElementById('mcd').classList.add('open');
+  // store for use in closeMonth
+  window._mcdOldKey = oldKey;
+  window._mcdNewKey = newKey;
+  window._mcdBal = bal;
+  window._mcdBalKeep = bal > 0; // default: keep if positive
+}
+
+function mcdToggle(group, val){
+  if(group==='bal'){
+    document.getElementById('mcd-bal-keep').classList.toggle('on', val==='keep');
+    document.getElementById('mcd-bal-drop').classList.toggle('on', val==='drop');
+    window._mcdBalKeep = val==='keep';
+  }
+}
+
+function closeMCD(){
+  document.getElementById('mcd').classList.remove('open');
+  // Update month key so we don't show again
+  store._month = window._mcdNewKey || ''; saveAll();
+}
+
+function closeMonth(){
+  const oldKey = window._mcdOldKey;
+  const newKey = window._mcdNewKey;
+  const [yr, mo] = (oldKey||'').split('-');
+  const label = MONTHS_UK[parseInt(mo)-1] + ' ' + yr;
+
+  // Calculate totals for archive
+  const totalInc = (bdata['extraIncome']||[]).reduce((s,i)=>s+i.plan,0);
+  let totalExp = 0;
+  SECTIONS.filter(s=>!s.isInc).forEach(s=>{ totalExp += (bdata[s.key]||[]).reduce((sum,i)=>sum+sumFacts(i),0); });
+  const bal = window._mcdBal;
+
+  // Save to history
+  const snapshot = {
+    month: oldKey, label,
+    totalInc, totalExp, balance: bal,
+    sections: SECTIONS.map(s=>({
+      key:s.key, lbl:s.lbl, icon:s.icon, isInc:s.isInc,
+      items:(bdata[s.key]||[]).map(i=>({
+        name:i.name, plan:i.plan, fact:sumFacts(i), recurring:i.recurring
+      }))
+    })),
+    debts: JSON.parse(JSON.stringify(debts))
+  };
+  history.unshift(snapshot); // newest first
+
+  // Build new month bdata
+  const newBdata = {};
+  // Keep recurring expenses (reset facts), drop one-time
+  SECTIONS.forEach(s=>{
+    if(s.isInc){
+      newBdata[s.key] = []; // income starts fresh
+    } else if(s.key === 'debtsExpense'){
+      newBdata[s.key] = []; // rebuilt from debts
+    } else {
+      newBdata[s.key] = (bdata[s.key]||[])
+        .filter(i=>i.recurring) // keep only recurring
+        .map(i=>({...i, facts:[]})); // reset facts
+    }
+  });
+
+  // Transfer balance as income if chosen
+  if(window._mcdBalKeep && bal > 0){
+    if(!newBdata['extraIncome']) newBdata['extraIncome']=[];
+    newBdata['extraIncome'].push({
+      id:uid(), name:'Залишок з '+label, plan:Math.round(bal), facts:[], isCarryover:true
+    });
+  }
+
+  // Apply new bdata
+  Object.assign(bdata, newBdata);
+  // Reset openPanels
+  openPanels.clear();
+
+  // Update month key
+  store._month = newKey;
+
+  closeMCD();
+  saveAll();
+  renderBudget();
+  renderDebts();
+  renderHistory();
+  confetti();
+  showToast('🦆 ' + label + ' закрито! Починаємо новий місяць!');
+}
+
+// ── RENDER HISTORY ──────────────────────────────────────────
+function renderHistory(){
+  const root = document.getElementById('hist-root');
+  if(!root) return;
+  root.innerHTML = '';
+  if(!history.length){
+    root.innerHTML = '<div class="no-hist">📅 Історія порожня — закрий перший місяць щоб вона з'явилась</div>';
+    return;
+  }
+  history.forEach(h=>{
+    const isOpen = openHistPanels.has(h.month);
+    const balColor = h.balance>=0?'var(--green)':'var(--red)';
+    const card = document.createElement('div');
+    card.className = 'hist-month';
+    let sectionsHtml = '';
+    h.sections.forEach(s=>{
+      if(!s.items.length) return;
+      const rows = s.items.map(i=>`
+        <div class="hm-item">
+          <span class="hm-item-name">${s.icon} ${i.name}${i.recurring?'<span class="rec-badge">🔄</span>':''}</span>
+          <div class="hm-item-vals">
+            <span>план: ${fmt(i.plan)}</span>
+            <span class="fact">факт: ${fmt(i.fact)}</span>
+          </div>
+        </div>`).join('');
+      sectionsHtml += `<div class="hm-sec"><div class="hm-sec-ttl">${s.icon} ${s.lbl}</div>${rows}</div>`;
+    });
+    card.innerHTML = `
+      <div class="hm-hdr" onclick="toggleHist('${h.month}')">
+        <div class="hm-title">${h.label}</div>
+        <div class="hm-badge">
+          <span class="hm-bal ${h.balance>=0?'pos':'neg'}">${fmt(h.balance)}</span>
+          <span class="hm-chev ${isOpen?'open':''}">▶</span>
+        </div>
+      </div>
+      <div class="hm-body ${isOpen?'open':''}">
+        ${sectionsHtml}
+        <div class="hm-sumrow">
+          <span class="hm-sum-lbl">Підсумок</span>
+          <div class="hm-sum-vals">
+            <div class="hm-sv"><div class="hm-sv-l">дохід</div><div class="hm-sv-v" style="color:var(--accent)">${fmt(h.totalInc)}</div></div>
+            <div class="hm-sv"><div class="hm-sv-l">витрати</div><div class="hm-sv-v" style="color:var(--red)">${fmt(h.totalExp)}</div></div>
+            <div class="hm-sv"><div class="hm-sv-l">залишок</div><div class="hm-sv-v" style="color:${balColor}">${fmt(h.balance)}</div></div>
+          </div>
+        </div>
+      </div>`;
+    root.appendChild(card);
+  });
+}
+
+function toggleHist(key){
+  openHistPanels.has(key)?openHistPanels.delete(key):openHistPanels.add(key);
+  renderHistory();
+}
+
 // ═══════════════════════════════════════
 //  SAVE / LOAD
 // ═══════════════════════════════════════
-function saveAll(){
+async function saveAll(){
   try {
-    store.set('b_cur', JSON.stringify(CUR));
-    store.set('b_cats', JSON.stringify(CATS_ACTIVE));
-    store.set('b_custom', JSON.stringify(CATS_CUSTOM));
-    store.set('b_bdata', JSON.stringify(bdata));
-    store.set('b_debts', JSON.stringify(debts));
-    store.set('b_nextid', String(nextId));
-    store.set('b_done', '1');
-  } catch(e){ console.warn('save failed', e); }
+    // Pack all data into structured keys with version
+    const meta = { v: DATA_VERSION, cur: CUR, cats: CATS_ACTIVE, custom: CATS_CUSTOM, nextId, month: store._month };
+    await store.set('bv1_meta',   JSON.stringify(meta));
+    await store.set('bv1_bdata',  JSON.stringify(bdata));
+    await store.set('bv1_debts',  JSON.stringify(debts));
+    await store.set('bv1_hist',   JSON.stringify(history));
+  } catch(e){ console.warn('saveAll failed', e); }
 }
 
-function loadAll(){
+async function loadAll(){
   try {
-    const cur=store.get('b_cur'); if(cur){ CUR=JSON.parse(cur); }
-    const cats=store.get('b_cats'); if(cats){ CATS_ACTIVE=JSON.parse(cats); }
-    const custom=store.get('b_custom'); if(custom){ CATS_CUSTOM=JSON.parse(custom); }
-    const bd=store.get('b_bdata'); if(bd){ bdata=JSON.parse(bd); }
-    const db=store.get('b_debts'); if(db){ debts=JSON.parse(db); }
-    const nid=store.get('b_nextid'); if(nid){ nextId=parseInt(nid)||1; }
-    return !!store.get('b_done');
-  } catch(e){ console.warn('load failed', e); return false; }
+    const vals = await store.getAll(['bv1_meta','bv1_bdata','bv1_debts','bv1_hist']);
+
+    // ── No bv1_meta = first launch ──────────────────────────
+    if(!vals['bv1_meta']) return false;
+
+    // ── Load from CloudStorage ────────────────────────────────
+    if(vals['bv1_meta']){
+      const meta = JSON.parse(vals['bv1_meta']);
+      // Version migration hook — bump DATA_VERSION and add cases here
+      // if(meta.v < 2){ /* migrate v1→v2 */ }
+      if(meta.cur)    CUR          = meta.cur;
+      if(meta.cats)   CATS_ACTIVE  = meta.cats;
+      if(meta.custom) CATS_CUSTOM  = meta.custom;
+      if(meta.nextId) nextId       = meta.nextId;
+      if(meta.month)  store._month = meta.month;
+    }
+    if(vals['bv1_bdata']) { try{ bdata   = JSON.parse(vals['bv1_bdata']); }catch(e){} }
+    if(vals['bv1_debts']) { try{ debts   = JSON.parse(vals['bv1_debts']); }catch(e){} }
+    if(vals['bv1_hist'])  { try{ history = JSON.parse(vals['bv1_hist']);  }catch(e){} }
+    return true;
+  } catch(e){ console.warn('loadAll failed', e); return false; }
 }
 
 // ═══════════════════════════════════════
@@ -1092,13 +1505,26 @@ try {
   }
 } catch(e){ console.warn('TG init',e); }
 
-// Main startup
-loadAll();
-if(CATS_ACTIVE.length===0) CATS_ACTIVE = BASE_CATS.map(c=>c.key);
-rebuildSections();
-initCurSwitcher();
-renderBudget();
-renderDebts();
+// Main startup — async because CloudStorage is async
+(async function(){
+  // Show loading indicator
+  document.body.innerHTML += '<div id="loading" style="position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style=\"font-size:36px;animation:duckFloat 1s ease-in-out infinite\">🦆</div><div style=\"font-size:11px;color:var(--muted2);letter-spacing:2px\">ЗАВАНТАЖЕННЯ...</div></div>';
+
+  const done = await loadAll();
+
+  // Remove loading
+  document.getElementById('loading')?.remove();
+
+  if(!done){
+    document.getElementById('ob').classList.remove('hide');
+  } else {
+    rebuildSections();
+    renderBudget();
+    renderDebts();
+    renderHistory();
+    checkMonthRollover();
+  }
+})();
 </script>
 </body>
 </html>
