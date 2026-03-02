@@ -512,7 +512,7 @@ input, select, textarea { font-size: 16px !important; }
     <div class="ds-grid">
       <div class="ds td"><div class="ds-lbl">Загальний борг</div><div class="ds-val" id="ds-tot">—</div></div>
       <div class="ds mp"><div class="ds-lbl">Виплачено</div><div class="ds-val" id="ds-paid">—</div></div>
-      <div class="ds df"><div class="ds-lbl">До свободи</div><div class="ds-val" id="ds-free">—</div></div>
+      <div class="ds df"><div class="ds-lbl">Розстрочки / міс</div><div class="ds-val" id="ds-free">—</div></div>
     </div>
     <div class="act-bar">
       <button class="abtn ad" onclick="openDebtModal('debt')">＋ Борг</button>
@@ -938,10 +938,18 @@ function rebuildSections(){
     if(!bdata[key]) bdata[key]=[];
     SECTIONS.push({key,lbl:cat.lbl,cls:'s-exp',isInc:false,icon:cat.icon});
   });
-  SECTIONS.push({key:'debtsExpense',lbl:'Борги та розстрочки',cls:'s-debt',isInc:false,icon:'💳'});
+  SECTIONS.push({key:'debtsExpense',lbl:'Розстрочки',cls:'s-debt',isInc:false,icon:'📅'});
   // ensure extraIncome exists
   if(!bdata['extraIncome']) bdata['extraIncome']=[];
-  if(!bdata['debtsExpense']) bdata['debtsExpense']=[];
+  // Clean debtsExpense — keep only installments (remove old debt entries)
+  if(bdata['debtsExpense']){
+    bdata['debtsExpense']=bdata['debtsExpense'].filter(i=>{
+      const d=debts.find(x=>x.id===i.debtId);
+      return d && d.type==='inst';
+    });
+  } else {
+    bdata['debtsExpense']=[];
+  }
   // rebuild cat dropdown
   const sel=document.getElementById('bm-cat');
   if(sel){
@@ -958,12 +966,15 @@ function rebuildSections(){
 function syncDebts(){
   bdata['debtsExpense']=[];
   debts.forEach(d=>{
+    // Тільки розстрочки йдуть в бюджет — борги живуть окремо у вкладці Борги
+    if(d.type !== 'inst') return;
     if(!d.budgetId) d.budgetId=uid();
+    const rem=(d.totalPay||1)-(d.donePay||0);
     bdata['debtsExpense'].push({
       id:d.budgetId, debtId:d.id,
       name:d.name,
-      note:d.type==='inst'?'розстрочка':'борг',
-      plan:d.type==='inst'?d.payment:d.amount,
+      note:'розстрочка · '+rem+' міс. залишилось',
+      plan:d.payment,
       facts:d.payments||[],
       isDebt:true
     });
@@ -1173,7 +1184,19 @@ function renderDebts(){
     root.innerHTML='<div class="no-debts">Боргів немає — чудово! 🎉</div>';
     updateDebtsSummary(); updateDebtsBadge(); return;
   }
-  debts.forEach(d=>{
+  // Sort: installments by nextDate first, then debts; within each group by date
+  const sorted = [...debts].sort((a,b)=>{
+    if(a.type===b.type){
+      if(a.type==='inst'){
+        const da=a.nextDate?new Date(a.nextDate):new Date('9999-12-31');
+        const db=b.nextDate?new Date(b.nextDate):new Date('9999-12-31');
+        return da-db;
+      }
+      return 0;
+    }
+    return a.type==='inst'?-1:1; // inst before debt
+  });
+  sorted.forEach(d=>{
     const card=document.createElement('div');
     card.className='debt-card type-'+d.type;
     const payments=d.payments||[];
@@ -1273,15 +1296,19 @@ function deleteDebt(id){
 }
 
 function updateDebtsSummary(){
-  const tot=debts.reduce((s,d)=>{
+  // Total remaining debt (debts only)
+  const tot=debts.filter(d=>d.type==='debt').reduce((s,d)=>{
     const paid=(d.payments||[]).reduce((x,p)=>x+p.amount,0);
-    return s+(d.type==='debt'?Math.max(0,d.amount-paid):d.payment*(d.totalPay-(d.donePay||0)));
+    return s+Math.max(0,d.amount-paid);
   },0);
+  // Total paid across all
   const paid=debts.reduce((s,d)=>(d.payments||[]).reduce((x,p)=>x+p.amount,s),0);
-  const maxM=debts.filter(d=>d.type==='inst').reduce((m,d)=>Math.max(m,d.totalPay-(d.donePay||0)),0);
+  // Sum of this month's installment payments
+  const monthlyInst=debts.filter(d=>d.type==='inst'&&(d.donePay||0)<(d.totalPay||1))
+    .reduce((s,d)=>s+d.payment,0);
   document.getElementById('ds-tot').textContent=fmt(tot);
   document.getElementById('ds-paid').textContent=fmt(paid);
-  document.getElementById('ds-free').textContent=maxM>0?maxM+' міс':'—';
+  document.getElementById('ds-free').textContent=monthlyInst>0?fmt(monthlyInst):'—';
 }
 
 function updateDebtsBadge(){
