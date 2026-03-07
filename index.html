@@ -743,6 +743,9 @@ body.light .h-month{box-shadow:0 2px 8px rgba(60,40,10,.07);}
 
   <!-- DEBTS TAB -->
   <div class="tab-panel" id="tab-debts">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button onclick="syncAllOverdue()" style="font-family:'Syne',sans-serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;padding:7px 14px;border:1px solid var(--accent);color:var(--accent);background:var(--accent-dim);cursor:pointer;transition:all .2s;" onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='var(--accent-dim)'">⚡ Синхронізувати всі</button>
+    </div>
     <div class="ds-grid">
       <div class="ds td"><div class="ds-lbl">Загальний борг</div><div class="ds-val" id="ds-tot">—</div></div>
       <div class="ds mp"><div class="ds-lbl">Виплачено</div><div class="ds-val" id="ds-paid">—</div></div>
@@ -1727,6 +1730,23 @@ function confirmDM(){
     if(debts.length>0) debts[debts.length-1].payments=oldPayments;
   }
   closeDM(); syncDebts(); saveAll(); renderDebts(); renderBudget();
+  // If just saved with autoDebit ON — check if payment date already passed
+  const justSaved = debts[debts.length-1];
+  if(justSaved && justSaved.type==='inst' && justSaved.autoDebit){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().split('T')[0];
+    if(justSaved.nextDate){
+      const payDate = new Date(justSaved.nextDate); payDate.setHours(0,0,0,0);
+      const alreadyPaid = (justSaved.payments||[]).some(p=>p.autoDate===todayStr);
+      if(payDate <= today && !alreadyPaid){
+        // Small delay so UI renders first, then auto-pay fires
+        setTimeout(()=>{
+          checkAutoDebits();
+          showToast('🤖 Дата вже минула — платіж списано автоматично');
+        }, 300);
+      }
+    }
+  }
 }
 
 
@@ -2282,6 +2302,63 @@ function checkAutoDebits(){
     setTimeout(() => {
       showToast('🤖 Автосписання: ' + autoPaid.join(', '));
     }, 800);
+  }
+}
+
+// ── SYNC ALL OVERDUE INSTALLMENTS ────────────────────────────
+function syncAllOverdue(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().split('T')[0];
+  let count = 0;
+  let totalAmt = 0;
+
+  debts.forEach(d => {
+    if(d.type !== 'inst' || !d.autoDebit) return;
+    if((d.donePay||0) >= (d.totalPay||1)) return;
+    if(!d.nextDate) return;
+
+    // Keep paying until nextDate is in the future
+    let safety = 0;
+    while(safety++ < 60) {
+      const payDate = new Date(d.nextDate); payDate.setHours(0,0,0,0);
+      if(payDate > today) break;
+
+      d.donePay = (d.donePay||0) + 1;
+      if(!d.payments) d.payments = [];
+      d.payments.push({
+        id: uid(),
+        label: 'Платіж ' + d.donePay + ' з ' + d.totalPay + ' (авто)',
+        amount: d.payment,
+        autoDate: todayStr
+      });
+
+      // Add to budget facts
+      if(!bdata['debtsExpense']) bdata['debtsExpense'] = { plan:0, facts:[] };
+      const alreadyInBudget = (bdata['debtsExpense'].facts||[]).some(f => f._debtId===d.id && f._payIdx===d.donePay);
+      if(!alreadyInBudget){
+        if(!bdata['debtsExpense'].facts) bdata['debtsExpense'].facts = [];
+        bdata['debtsExpense'].facts.push({
+          id: uid(), label: d.name + ' — платіж ' + d.donePay,
+          amount: d.payment, _debtId: d.id, _payIdx: d.donePay
+        });
+        totalAmt += d.payment;
+      }
+
+      // Advance next date
+      const nd = new Date(d.nextDate);
+      nd.setMonth(nd.getMonth() + 1);
+      d.nextDate = nd.toISOString().split('T')[0];
+
+      count++;
+      if((d.donePay||0) >= (d.totalPay||1)) break;
+    }
+  });
+
+  if(count > 0){
+    saveAll(); syncDebts(); renderDebts(); renderBudget();
+    showToast('✅ Списано ' + count + ' платеж' + (count===1?'':'ів') + ' на ₴' + fmt(totalAmt).replace('₴',''));
+  } else {
+    showToast('👌 Всі розстрочки актуальні');
   }
 }
 
